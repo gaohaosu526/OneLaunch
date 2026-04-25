@@ -13,14 +13,14 @@
         - name: Checkout
           uses: actions/checkout@v4
 
-        - name: Select Xcode 16
-          run: sudo xcode-select -s /Applications/Xcode_16.app
+        - name: Show Xcode version
+          run: xcodebuild -version
 
         - name: Install XcodeGen
           run: brew install xcodegen
 
         - name: Generate Xcode Project
-          run: xcodegen generate
+          run: xcodegen generate --spec Ai-OneLaunch/project.yml
 
         - name: Build Archive (unsigned)
           run: |
