@@ -83,9 +83,9 @@ private struct GroupDetailView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 20) {
                     ForEach(apps) { app in
-                        AppIconView(app: app, icon: iconProvider(app.bundleID)) {
+                        AppIconView(app: app, icon: iconProvider(app.bundleID), onTap: {
                             onAppTap?(app)
-                        }
+                        })
                         .contextMenu {
                             Button(role: .destructive) {
                                 onRemoveApp?(app)
