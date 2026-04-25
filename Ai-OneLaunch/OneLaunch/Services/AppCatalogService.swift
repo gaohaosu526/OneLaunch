@@ -24,49 +24,13 @@ final class AppCatalogService {
     }
 
     private func fetchProxies() -> [LSApplicationProxy] {
-        // Try LSApplicationWorkspace.default()
-        if let ws = LSApplicationWorkspace.default() {
-            if let apps = ws.allApplications(), !apps.isEmpty { return apps }
-            if let apps = ws.allInstalledApplications(), !apps.isEmpty { return apps }
-        }
-        // Try LSApplicationWorkspace.defaultWorkspace()
-        if let ws = LSApplicationWorkspace.defaultWorkspace() {
-            if let apps = ws.allApplications(), !apps.isEmpty { return apps }
-            if let apps = ws.allInstalledApplications(), !apps.isEmpty { return apps }
-        }
-        // ObjC runtime fallback
-        return fetchProxiesViaRuntime()
-    }
-
-    private func fetchProxiesViaRuntime() -> [LSApplicationProxy] {
-        guard let cls = NSClassFromString("LSApplicationWorkspace") as? NSObject.Type else { return [] }
-        let selectors = ["defaultWorkspace", "default", "sharedInstance"]
-        var workspace: NSObject?
-        for selName in selectors {
-            let sel = NSSelectorFromString(selName)
-            if cls.responds(to: sel) {
-                workspace = cls.perform(sel)?.takeUnretainedValue() as? NSObject
-                if workspace != nil { break }
-            }
-        }
-        guard let ws = workspace else { return [] }
-        let appSelectors = ["allApplications", "allInstalledApplications"]
-        for selName in appSelectors {
-            let sel = NSSelectorFromString(selName)
-            if ws.responds(to: sel),
-               let result = ws.perform(sel)?.takeUnretainedValue() as? [LSApplicationProxy],
-               !result.isEmpty {
-                return result
-            }
-        }
-        return []
+        guard let ws = LSApplicationWorkspace.default() else { return [] }
+        return ws.allApplications() ?? ws.allInstalledApplications() ?? []
     }
 
     func icon(for bundleID: String) -> UIImage? {
-        if let ws = LSApplicationWorkspace.default() ?? LSApplicationWorkspace.defaultWorkspace(),
-           let proxy = (ws.allApplications() ?? ws.allInstalledApplications())?.first(where: { $0.applicationIdentifier == bundleID }) {
-            return proxy.icon()
-        }
-        return nil
+        guard let ws = LSApplicationWorkspace.default() else { return nil }
+        let apps = ws.allApplications() ?? ws.allInstalledApplications()
+        return apps?.first(where: { $0.applicationIdentifier == bundleID })?.icon()
     }
 }
