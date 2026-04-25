@@ -1,4 +1,4 @@
-  name: Build IPA
+  name: Build IPA                                                                                                                                                                                                                                                                          
 
   on:
     push:
@@ -8,6 +8,9 @@
   jobs:
     build:
       runs-on: macos-15
+      defaults:
+        run:
+          working-directory: Ai-OneLaunch
 
       steps:
         - name: Checkout
@@ -20,25 +23,28 @@
           run: brew install xcodegen
 
         - name: Generate Xcode Project
-          run: xcodegen generate --spec Ai-OneLaunch/project.yml
+          run: xcodegen generate
+
+        - name: List generated files
+          run: ls -la
 
         - name: Build Archive (unsigned)
           run: |
             xcodebuild archive \
+              -project OneLaunch.xcodeproj \
               -scheme OneLaunch \
               -sdk iphoneos \
               -archivePath "$GITHUB_WORKSPACE/build/OneLaunch.xcarchive" \
               CODE_SIGN_IDENTITY="" \
               CODE_SIGNING_REQUIRED=NO \
               CODE_SIGNING_ALLOWED=NO \
-              ONLY_ACTIVE_ARCH=NO \
-              -quiet
+              ONLY_ACTIVE_ARCH=NO
 
         - name: Package IPA
           run: |
             mkdir -p Payload
-            cp -r build/OneLaunch.xcarchive/Products/Applications/OneLaunch.app Payload/
-            zip -r OneLaunch-unsigned.ipa Payload/
+            cp -r "$GITHUB_WORKSPACE/build/OneLaunch.xcarchive/Products/Applications/OneLaunch.app" Payload/
+            zip -r "$GITHUB_WORKSPACE/OneLaunch-unsigned.ipa" Payload/
             rm -rf Payload/
 
         - name: Upload IPA artifact
