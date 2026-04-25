@@ -18,7 +18,6 @@
 // LSApplicationWorkspace: enumerates all installed apps
 @interface LSApplicationWorkspace : NSObject
 + (instancetype)default;
-+ (instancetype)defaultWorkspace;
 - (NSArray<LSApplicationProxy *> *)allApplications;
 - (NSArray<LSApplicationProxy *> *)allInstalledApplications;
 - (BOOL)openApplicationWithBundleID:(NSString *)bundleID;
