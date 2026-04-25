@@ -15,7 +15,12 @@ final class HomeViewModel: ObservableObject {
     }
 
     func loadApps() {
-        apps = catalog.fetchAllApps()
+        Task {
+            let result = await Task.detached(priority: .userInitiated) {
+                AppCatalogService.shared.fetchAllApps()
+            }.value
+            self.apps = result
+        }
     }
 
     func launch(_ app: AppItem) {
