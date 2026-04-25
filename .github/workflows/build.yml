@@ -1,55 +1,27 @@
-  name: Build IPA                                                                                                                                                                                                                                                                          
+name: OneLaunch
 
-  on:
-    push:
-      branches: [main]
-    workflow_dispatch:
+options:
+  bundleIdPrefix: com.personal
+  deploymentTarget:
+    iOS: "17.0"
 
-  jobs:
-    build:
-      runs-on: macos-15
-      defaults:
-        run:
-          working-directory: Ai-OneLaunch
-
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Show Xcode version
-          run: xcodebuild -version
-
-        - name: Install XcodeGen
-          run: brew install xcodegen
-
-        - name: Generate Xcode Project
-          run: xcodegen generate
-
-        - name: List generated files
-          run: ls -la
-
-        - name: Build Archive (unsigned)
-          run: |
-            xcodebuild archive \
-              -project OneLaunch.xcodeproj \
-              -scheme OneLaunch \
-              -sdk iphoneos \
-              -archivePath "$GITHUB_WORKSPACE/build/OneLaunch.xcarchive" \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO \
-              ONLY_ACTIVE_ARCH=NO
-
-        - name: Package IPA
-          run: |
-            mkdir -p Payload
-            cp -r "$GITHUB_WORKSPACE/build/OneLaunch.xcarchive/Products/Applications/OneLaunch.app" Payload/
-            zip -r "$GITHUB_WORKSPACE/OneLaunch-unsigned.ipa" Payload/
-            rm -rf Payload/
-
-        - name: Upload IPA artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: OneLaunch-IPA
-            path: OneLaunch-unsigned.ipa
-            retention-days: 90
+targets:
+  OneLaunch:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: OneLaunch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.personal.onelaunch
+        SWIFT_VERSION: "5.9"
+        SWIFT_OBJC_BRIDGING_HEADER: OneLaunch/BridgingHeader.h
+        INFOPLIST_FILE: OneLaunch/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: ""
+        PROVISIONING_PROFILE_SPECIFIER: ""
+        ENABLE_BITCODE: "NO"
+        OTHER_LDFLAGS: "-Xlinker -undefined -Xlinker dynamic_lookup"
