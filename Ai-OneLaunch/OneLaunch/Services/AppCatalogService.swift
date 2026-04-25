@@ -4,9 +4,13 @@ final class AppCatalogService {
     static let shared = AppCatalogService()
     private init() {}
 
+    private var proxyCache: [String: LSApplicationProxy] = [:]
+
     func fetchAllApps() -> [AppItem] {
-        let proxies = fetchProxies()
-        guard !proxies.isEmpty else { return [] }
+        let proxies = ObjcSafeGetApplications() ?? []
+        proxyCache = proxies.reduce(into: [:]) { dict, proxy in
+            if let bid = proxy.applicationIdentifier { dict[bid] = proxy }
+        }
         return proxies
             .compactMap { proxy -> AppItem? in
                 guard let bundleID = proxy.applicationIdentifier, !bundleID.isEmpty else { return nil }
@@ -23,14 +27,8 @@ final class AppCatalogService {
             }
     }
 
-    private func fetchProxies() -> [LSApplicationProxy] {
-        guard let ws = LSApplicationWorkspace.default() else { return [] }
-        return ws.allApplications() ?? ws.allInstalledApplications() ?? []
-    }
-
     func icon(for bundleID: String) -> UIImage? {
-        guard let ws = LSApplicationWorkspace.default() else { return nil }
-        let apps = ws.allApplications() ?? ws.allInstalledApplications()
-        return apps?.first(where: { $0.applicationIdentifier == bundleID })?.icon()
+        guard let proxy = proxyCache[bundleID] else { return nil }
+        return ObjcSafeGetIcon(proxy)
     }
 }
