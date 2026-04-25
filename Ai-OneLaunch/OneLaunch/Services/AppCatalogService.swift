@@ -5,8 +5,8 @@ final class AppCatalogService {
     private init() {}
 
     func fetchAllApps() -> [AppItem] {
-        let workspace = LSApplicationWorkspace.defaultWorkspace()
-        guard let proxies = workspace.allApplications() as? [LSApplicationProxy] else {
+        guard let workspace = LSApplicationWorkspace.default(),
+              let proxies = workspace.allApplications() else {
             return []
         }
         return proxies
@@ -25,12 +25,11 @@ final class AppCatalogService {
     }
 
     func icon(for bundleID: String) -> UIImage? {
-        let workspace = LSApplicationWorkspace.defaultWorkspace()
-        guard let proxies = workspace.allApplications() as? [LSApplicationProxy],
+        guard let workspace = LSApplicationWorkspace.default(),
+              let proxies = workspace.allApplications(),
               let proxy = proxies.first(where: { $0.applicationIdentifier == bundleID }) else {
             return nil
         }
-        if let img = proxy.icon() { return img }
-        return nil
+        return proxy.icon()
     }
 }
