@@ -23,4 +23,9 @@
 - (BOOL)openApplicationWithBundleID:(NSString *)bundleID;
 @end
 
+// ObjC exception-safe wrappers — Swift cannot catch NSException
+NSArray<LSApplicationProxy *> * _Nullable ObjcSafeGetApplications(void);
+BOOL ObjcSafeOpenApp(NSString * _Nonnull bundleID);
+UIImage * _Nullable ObjcSafeGetIcon(LSApplicationProxy * _Nonnull proxy);
+
 #endif
