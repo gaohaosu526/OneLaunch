@@ -5,11 +5,8 @@ final class AppLaunchService {
     private init() {}
 
     func launch(_ app: AppItem) {
-        if let workspace = LSApplicationWorkspace.default(),
-           workspace.openApplication(withBundleID: app.bundleID) {
-            return
-        }
-
+        let ws = LSApplicationWorkspace.default() ?? LSApplicationWorkspace.defaultWorkspace()
+        if let ws, ws.openApplicationWithBundleID(app.bundleID) { return }
         guard let scheme = app.urlScheme,
               let url = URL(string: "\(scheme)://") else { return }
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
